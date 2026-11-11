@@ -28,8 +28,10 @@ def run_agent(question, provider, tools, max_steps=6):
     # tool result kèm đúng tool_call_id vào messages; sau đó gọi model tiếp.
     # Khi có final answer, kiểm tra nguồn như yêu cầu ở Bài 4 trong GUIDE.md.
     # Trả completed, max_steps hoặc error cùng answer, trace và usage.
+    schemas = getattr(tools, 'schemas', SCHEMAS)
+    system_prompt = getattr(tools, 'system_prompt', SYSTEM_PROMPT)
     messages = [
-        {'role': 'system', 'content': SYSTEM_PROMPT},
+        {'role': 'system', 'content': system_prompt},
         {'role': 'user', 'content': question},
     ]
     trace = []
@@ -37,7 +39,7 @@ def run_agent(question, provider, tools, max_steps=6):
     observed_urls = set()
     for step in range(1, max_steps + 1):
         try:
-            resp = provider.complete(messages, SCHEMAS)
+            resp = provider.complete(messages, schemas)
         except RuntimeError as exc:
             return {
                 'status': 'error',
